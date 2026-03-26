@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pc_website
+      POSTGRES_USER: pc_user
+      POSTGRES_PASSWORD: pc_pass
+      # Local dev only: allow host connections without fighting pg_hba/network quirks.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+

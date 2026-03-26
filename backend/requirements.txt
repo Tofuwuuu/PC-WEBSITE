@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+fastapi-users[sqlalchemy]
+SQLAlchemy[asyncio]
+aiosqlite
+alembic
+asyncpg
+
