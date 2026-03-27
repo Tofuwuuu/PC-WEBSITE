@@ -1,0 +1,13 @@
+cd E:\Projects\PC-WEBSITE\backend
+.\.venv\Scripts\Activate.ps1
+
+docker compose up -d
+
+alembic upgrade head
+
+uvicorn main:app --reload --port 8000
+
+
+frontend
+cd frontend
+npm run dev
