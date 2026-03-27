@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useAuth } from '../auth/authStore'
 import type { Product } from '../types'
+import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -46,38 +48,66 @@ export function DashboardPage() {
   }
 
   return (
-    <div>
+    <div className="ui-stack">
       <h1>Dashboard</h1>
-      <div style={{ marginBottom: 16, opacity: 0.9 }}>
-        Signed in as <strong>{user?.email ?? 'unknown'}</strong>
-        <div style={{ marginTop: 8 }}>
-          <button onClick={onLogout} type="button" style={{ marginRight: 12 }}>
-            Log out
-          </button>
-          <Link to="/dashboard/products/new">Add new</Link>
-        </div>
-      </div>
-
-      {error && <p style={{ color: 'var(--accent)' }}>Error: {error}</p>}
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-          {products.map((p) => (
-            <div key={p.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12 }}>
-              <h3 style={{ marginTop: 0 }}>{p.name}</h3>
-              {p.description && <p style={{ marginBottom: 8 }}>{p.description}</p>}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <Link to={`/dashboard/products/${p.id}`}>Edit</Link>
-                <button onClick={() => onDelete(p.id)} type="button">
-                  Delete
-                </button>
-              </div>
+      <Card variant="feature">
+        <div className="dash-summary">
+          <div>
+            <p className="hero-kicker" style={{ marginBottom: 8 }}>Control Center</p>
+            <p className="page-lead" style={{ margin: 0 }}>
+              Signed in as <strong>{user?.email ?? 'unknown'}</strong>
+            </p>
+            <div className="dash-stats" style={{ marginTop: 14 }}>
+              <span className="dash-stat-chip">Items: {products.length}</span>
+              <span className="dash-stat-chip">Status: Active</span>
+              <span className="dash-stat-chip">Theme: Premium Dark</span>
             </div>
-          ))}
+          </div>
+          <div className="ui-inline">
+            <Button onClick={onLogout} variant="ghost" type="button">
+              Log out
+            </Button>
+            <Link to="/dashboard/products/new">
+              <Button variant="neon" type="button">
+                Add new
+              </Button>
+            </Link>
+          </div>
         </div>
+      </Card>
+
+      {error && <p className="ui-alert">Error: {error}</p>}
+      {loading ? (
+        <Card variant="glass">
+          <p style={{ color: 'var(--text-muted)' }}>Loading products...</p>
+        </Card>
+      ) : (
+        <>
+          {products.length === 0 && (
+            <Card variant="glass">
+              <p style={{ color: 'var(--text-muted)' }}>No products yet. Add your first one.</p>
+            </Card>
+          )}
+          <div className="ui-grid">
+            {products.map((p) => (
+              <Card key={p.id} variant="compact">
+                <h3 style={{ marginTop: 0, color: 'var(--text-strong)' }}>{p.name}</h3>
+                {p.description && <p style={{ marginBottom: 8 }}>{p.description}</p>}
+                <div className="ui-inline">
+                  <Link to={`/dashboard/products/${p.id}`}>
+                    <Button variant="outline-accent" type="button">
+                      Edit
+                    </Button>
+                  </Link>
+                  <Button onClick={() => onDelete(p.id)} variant="danger" type="button">
+                    Delete
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )
 }
-

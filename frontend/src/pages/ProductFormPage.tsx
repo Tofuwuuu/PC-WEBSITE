@@ -3,6 +3,9 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Product, ProductCreate, ProductUpdate } from '../types'
+import { Card } from '../components/ui/Card'
+import { InputField, TextareaField } from '../components/ui/FormField'
+import { Button } from '../components/ui/Button'
 
 export function ProductFormPage() {
   const navigate = useNavigate()
@@ -70,47 +73,42 @@ export function ProductFormPage() {
   }
 
   return (
-    <div>
-      <h1>{isEdit ? 'Edit item' : 'Add item'}</h1>
-      <p>
+    <div className="ui-stack" style={{ maxWidth: 700, width: '100%', margin: '0 auto' }}>
+      <div className="ui-inline" style={{ justifyContent: 'space-between' }}>
+        <h1>{isEdit ? 'Edit item' : 'Add item'}</h1>
         <Link to="/dashboard">Back to dashboard</Link>
-      </p>
+      </div>
 
-      {error && <p style={{ color: 'var(--accent)' }}>Error: {error}</p>}
+      {error && <p className="ui-alert">Error: {error}</p>}
       {loading ? (
-        <div>Loading...</div>
+        <Card variant="glass">
+          <p style={{ color: 'var(--text-muted)' }}>Loading item...</p>
+        </Card>
       ) : (
-        <form onSubmit={onSubmit} style={{ maxWidth: 520 }}>
-          <div style={{ marginBottom: 12 }}>
-            <label>
-              Name
-              <input value={name} onChange={(e) => setName(e.target.value)} required style={{ width: '100%' }} />
-            </label>
-          </div>
-
-          <div style={{ marginBottom: 12 }}>
-            <label>
-              Description
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                style={{ width: '100%' }}
-              />
-            </label>
-          </div>
-
-          <div style={{ marginBottom: 12 }}>
-            <label>
-              URL (optional)
-              <input value={url} onChange={(e) => setUrl(e.target.value)} type="url" style={{ width: '100%' }} />
-            </label>
-          </div>
-
-          <button disabled={submitting} type="submit">
-            {submitting ? 'Saving...' : 'Save'}
-          </button>
-        </form>
+        <Card variant="feature">
+          <form onSubmit={onSubmit} className="ui-stack">
+            <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="RTX 4080 Super" />
+            <TextareaField
+              label="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              placeholder="Short details about this component..."
+            />
+            <InputField
+              label="URL (optional)"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              type="url"
+              placeholder="https://..."
+            />
+            <div className="ui-inline">
+              <Button loading={submitting} type="submit" variant="neon">
+                {submitting ? 'Saving...' : 'Save item'}
+              </Button>
+            </div>
+          </form>
+        </Card>
       )}
     </div>
   )

@@ -3,6 +3,9 @@ import type { FormEvent } from 'react'
 import { api } from '../api/client'
 import { useAuth } from '../auth/authStore'
 import { useNavigate, Link } from 'react-router-dom'
+import { Card } from '../components/ui/Card'
+import { InputField } from '../components/ui/FormField'
+import { Button } from '../components/ui/Button'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -38,29 +41,41 @@ export function LoginPage() {
   }
 
   return (
-    <div>
-      <h1>Log in</h1>
-      <form onSubmit={onSubmit} style={{ maxWidth: 420 }}>
-        {error && <p style={{ color: 'var(--accent)' }}>Error: {error}</p>}
-        <div style={{ marginBottom: 12 }}>
-          <label>
-            Email
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required style={{ width: '100%' }} />
-          </label>
+    <div className="auth-shell">
+      <Card className="auth-card" variant="glass">
+        <div className="ui-stack">
+          <div>
+            <p className="hero-kicker">Account Access</p>
+            <h1 className="auth-title">Welcome back</h1>
+            <p className="page-lead">Log in to manage your catalog and dashboard.</p>
+          </div>
+          <form onSubmit={onSubmit} className="ui-stack">
+            {error && <p className="ui-alert">Error: {error}</p>}
+            <InputField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              required
+              placeholder="you@example.com"
+            />
+            <InputField
+              label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              required
+              placeholder="Your password"
+            />
+            <Button loading={submitting} type="submit" variant="neon">
+              {submitting ? 'Logging in...' : 'Log in'}
+            </Button>
+          </form>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+            No account? <Link to="/register">Register</Link>
+          </p>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <label>
-            Password
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required style={{ width: '100%' }} />
-          </label>
-        </div>
-        <button disabled={submitting} type="submit">
-          {submitting ? 'Logging in...' : 'Log in'}
-        </button>
-      </form>
-      <p>
-        No account? <Link to="/register">Register</Link>
-      </p>
+      </Card>
     </div>
   )
 }
