@@ -14,6 +14,7 @@ export function ProductFormPage() {
   const isEdit = useMemo(() => Boolean(productId), [productId])
 
   const [name, setName] = useState('')
+  const [category, setCategory] = useState('categories')
   const [description, setDescription] = useState('')
   const [url, setUrl] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -30,6 +31,7 @@ export function ProductFormPage() {
         const res = await api.get<Product>(`/products/${productId}`)
         if (cancelled) return
         setName(res.data.name ?? '')
+        setCategory(res.data.category ?? 'categories')
         setDescription(res.data.description ?? '')
         setUrl(res.data.url ?? '')
       } catch (e: any) {
@@ -52,6 +54,7 @@ export function ProductFormPage() {
       if (isEdit && productId) {
         const payload: ProductUpdate = {
           name,
+          category,
           description: description || null,
           url: url || null,
         }
@@ -59,6 +62,7 @@ export function ProductFormPage() {
       } else {
         const payload: ProductCreate = {
           name,
+          category,
           description: description || undefined,
           url: url || undefined,
         }
@@ -87,6 +91,15 @@ export function ProductFormPage() {
       ) : (
         <Card variant="feature">
           <form onSubmit={onSubmit} className="ui-stack">
+            <label className="ui-field">
+              <span className="ui-field-label">Category</span>
+              <select className="ui-input" value={category} onChange={(e) => setCategory(e.target.value)}>
+                <option value="categories">Categories</option>
+                <option value="pre_built">Pre-Built PCs</option>
+                <option value="bundles">Bundles</option>
+                <option value="accessories">Accessories</option>
+              </select>
+            </label>
             <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="RTX 4080 Super" />
             <TextareaField
               label="Description"

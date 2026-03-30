@@ -17,6 +17,7 @@ class ProductRead(BaseModel):
 
     id: str
     name: str
+    category: str
     description: str | None = None
     url: str | None = None
     created_at: str | None = None
@@ -24,12 +25,14 @@ class ProductRead(BaseModel):
 
 class ProductCreate(BaseModel):
     name: str
+    category: str | None = None
     description: str | None = None
     url: str | None = None
 
 
 class ProductUpdate(BaseModel):
     name: str | None = None
+    category: str | None = None
     description: str | None = None
     url: str | None = None
 
@@ -40,13 +43,19 @@ def require_authenticated_user(user=Depends(current_active_user)):
 
 
 @router.get('/products', response_model=list[ProductRead])
-async def list_products(session: AsyncSession = Depends(get_async_session)):
-    res = await session.execute(select(ProductModel).order_by(ProductModel.created_at.desc()))
+async def list_products(category: str | None = None, session: AsyncSession = Depends(get_async_session)):
+    query = select(ProductModel)
+    if category:
+        query = query.where(ProductModel.category == category)
+    query = query.order_by(ProductModel.created_at.desc())
+
+    res = await session.execute(query)
     products: Sequence[ProductModel] = res.scalars().all()
     return [
         ProductRead(
             id=p.id,
             name=p.name,
+            category=p.category,
             description=p.description,
             url=p.url,
             created_at=str(p.created_at) if p.created_at else None,
@@ -64,6 +73,7 @@ async def get_product(product_id: str, session: AsyncSession = Depends(get_async
     return ProductRead(
         id=product.id,
         name=product.name,
+        category=product.category,
         description=product.description,
         url=product.url,
         created_at=str(product.created_at) if product.created_at else None,
@@ -78,6 +88,7 @@ async def create_product(
 ):
     product = ProductModel(
         name=payload.name,
+        category=payload.category or 'categories',
         description=payload.description,
         url=payload.url,
     )
@@ -87,6 +98,7 @@ async def create_product(
     return ProductRead(
         id=product.id,
         name=product.name,
+        category=product.category,
         description=product.description,
         url=product.url,
         created_at=str(product.created_at) if product.created_at else None,
@@ -107,6 +119,8 @@ async def update_product(
 
     if 'name' in payload.model_fields_set and payload.name is not None:
         product.name = payload.name
+    if 'category' in payload.model_fields_set:
+        product.category = payload.category or 'categories'
     if 'description' in payload.model_fields_set:
         product.description = payload.description
     if 'url' in payload.model_fields_set:
@@ -117,6 +131,7 @@ async def update_product(
     return ProductRead(
         id=product.id,
         name=product.name,
+        category=product.category,
         description=product.description,
         url=product.url,
         created_at=str(product.created_at) if product.created_at else None,

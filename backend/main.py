@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes.images import router as images_router
 from app.api.routes.products import router as products_router
 from app.auth.users import auth_backend, fastapi_users
 from app.db.session import Base, engine, DATABASE_URL
@@ -44,6 +45,7 @@ app.include_router(
     tags=['auth'],
 )
 
+app.include_router(images_router)
 app.include_router(products_router)
 
 

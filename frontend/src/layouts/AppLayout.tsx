@@ -25,10 +25,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="app-shell-nav app-shell-nav-center" aria-label="Primary">
-          <Link to="/">Categories</Link>
-          <Link to="/">Pre-Built PCs</Link>
-          <Link to="/">Bundles</Link>
-          <Link to="/">Accessories</Link>
+          <Link to="/categories">Categories</Link>
+          <Link to="/pre-built">Pre-Built PCs</Link>
+          <Link to="/bundles">Bundles</Link>
+          <Link to="/accessories">Accessories</Link>
           {token && <Link to="/dashboard">Dashboard</Link>}
         </nav>
 

@@ -6,6 +6,16 @@
   box-shadow: var(--shadow-soft);
 }
 
+.ui-card-clickable {
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ui-card-clickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
 .ui-card-feature {
   background: linear-gradient(165deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.88));
   border-color: var(--border-strong);

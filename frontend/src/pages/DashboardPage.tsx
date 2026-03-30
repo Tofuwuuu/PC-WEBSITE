@@ -6,6 +6,16 @@ import type { Product } from '../types'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 
+type ImageLookupResponse = {
+  found?: boolean
+  image_url: string | null
+  source_title?: string | null
+  source_page_url?: string | null
+  license_short_name?: string | null
+  license_url?: string | null
+  artist?: string | null
+}
+
 export function DashboardPage() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
@@ -13,6 +23,7 @@ export function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [imageByProductId, setImageByProductId] = useState<Record<string, ImageLookupResponse>>({})
 
   const loadProducts = async () => {
     setError(null)
@@ -30,6 +41,42 @@ export function DashboardPage() {
     loadProducts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadImages = async () => {
+      if (products.length === 0) {
+        setImageByProductId({})
+        return
+      }
+
+      const map: Record<string, ImageLookupResponse> = {}
+      for (const p of products) {
+        try {
+          const res = await api.get<ImageLookupResponse>(`/images/lookup?query=${encodeURIComponent(p.name)}`)
+          map[p.id] = res.data
+        } catch {
+          map[p.id] = {
+            found: false,
+            image_url: null,
+            source_title: null,
+            source_page_url: null,
+            license_short_name: null,
+            license_url: null,
+            artist: null,
+          }
+        }
+      }
+
+      if (!cancelled) setImageByProductId(map)
+    }
+
+    loadImages()
+    return () => {
+      cancelled = true
+    }
+  }, [products])
 
   const onDelete = async (id: string) => {
     if (!confirm('Delete this item?')) return
@@ -91,8 +138,56 @@ export function DashboardPage() {
           <div className="ui-grid">
             {products.map((p) => (
               <Card key={p.id} variant="compact">
+                {imageByProductId[p.id]?.image_url ? (
+                  <img
+                    src={imageByProductId[p.id]!.image_url as string}
+                    alt={p.name}
+                    loading="lazy"
+                    style={{
+                      width: '100%',
+                      height: 160,
+                      objectFit: 'cover',
+                      borderRadius: 12,
+                      marginBottom: 12,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: 160,
+                      borderRadius: 12,
+                      border: '1px dashed rgba(255,255,255,0.18)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--text-soft)',
+                      fontSize: 12,
+                      marginBottom: 12,
+                    }}
+                  >
+                    No image found
+                  </div>
+                )}
                 <h3 style={{ marginTop: 0, color: 'var(--text-strong)' }}>{p.name}</h3>
+                <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 12 }}>
+                  Category: <strong>{p.category}</strong>
+                </div>
                 {p.description && <p style={{ marginBottom: 8 }}>{p.description}</p>}
+                {imageByProductId[p.id]?.license_url && imageByProductId[p.id]?.license_short_name ? (
+                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 10 }}>
+                    License:{' '}
+                    <a
+                      href={imageByProductId[p.id]!.license_url as string}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: 'var(--accent-cyan)' }}
+                    >
+                      {imageByProductId[p.id]!.license_short_name}
+                    </a>
+                  </div>
+                ) : null}
                 <div className="ui-inline">
                   <Link to={`/dashboard/products/${p.id}`}>
                     <Button variant="outline-accent" type="button">
