@@ -6,6 +6,13 @@ import type { Product } from '../types'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 
+function fallbackSearchForProduct(p: Product): string {
+  if (p.category === 'pre_built') return 'gaming desktop pc'
+  if (p.category === 'bundles') return 'computer hardware components'
+  if (p.category === 'accessories') return 'computer monitor keyboard mouse'
+  return 'pc hardware'
+}
+
 type ImageLookupResponse = {
   found?: boolean
   image_url: string | null
@@ -55,7 +62,19 @@ export function DashboardPage() {
       for (const p of products) {
         try {
           const res = await api.get<ImageLookupResponse>(`/images/lookup?query=${encodeURIComponent(p.name)}`)
-          map[p.id] = res.data
+          let data = res.data
+
+          if (!data?.image_url) {
+            const fallbackTerm = fallbackSearchForProduct(p)
+            const fallbackRes = await api.get<ImageLookupResponse>(
+              `/images/lookup?query=${encodeURIComponent(fallbackTerm)}`,
+            )
+            if (fallbackRes.data?.image_url) {
+              data = fallbackRes.data
+            }
+          }
+
+          map[p.id] = data
         } catch {
           map[p.id] = {
             found: false,

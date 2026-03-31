@@ -7,7 +7,7 @@ from app.api.routes.images import router as images_router
 from app.api.routes.products import router as products_router
 from app.auth.users import auth_backend, fastapi_users
 from app.db.session import Base, engine, DATABASE_URL
-from app.schemas import UserCreate, UserRead
+from app.schemas import UserCreate, UserRead, UserUpdate
 
 app = FastAPI()
 
@@ -41,6 +41,12 @@ app.include_router(
 
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix='/auth/jwt',
+    tags=['auth'],
+)
+
+app.include_router(
+    fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix='/auth/jwt',
     tags=['auth'],
 )

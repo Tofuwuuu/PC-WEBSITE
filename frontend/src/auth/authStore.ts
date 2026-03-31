@@ -55,7 +55,9 @@ async function fetchMe(token: string): Promise<AuthUser> {
     },
   })
   if (!res.ok) {
-    throw new Error(`Failed to load current user: ${res.status}`)
+    const err = new Error(`Failed to load current user: ${res.status}`) as Error & { status?: number }
+    err.status = res.status
+    throw err
   }
   return (await res.json()) as AuthUser
 }
@@ -91,9 +93,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    refreshMe().catch(() => {
-      // If token is invalid/expired, clear local state.
-      logout()
+    refreshMe().catch((err: unknown) => {
+      // If `/me` is temporarily unavailable, don't immediately wipe the token.
+      // Only force-logout for auth-related failures.
+      const status = (err as { status?: number })?.status
+      if (status === 401 || status === 403) {
+        logout()
+        return
+      }
+      setUser(null)
+      setLoading(false)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

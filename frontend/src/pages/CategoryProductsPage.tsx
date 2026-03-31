@@ -21,6 +21,13 @@ type ImageLookupResponse = {
   artist?: string | null
 }
 
+function fallbackSearchForCategory(categoryKey: string): string {
+  if (categoryKey === 'pre_built') return 'gaming desktop pc'
+  if (categoryKey === 'bundles') return 'computer hardware components'
+  if (categoryKey === 'accessories') return 'computer monitor keyboard mouse'
+  return 'pc hardware'
+}
+
 export function CategoryProductsPage({ categoryKey, title, description }: Props) {
   const [products, setProducts] = useState<Product[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -62,7 +69,20 @@ export function CategoryProductsPage({ categoryKey, title, description }: Props)
       for (const p of products) {
         try {
           const res = await api.get<ImageLookupResponse>(`/images/lookup?query=${encodeURIComponent(p.name)}`)
-          map[p.id] = res.data
+          let data = res.data
+
+          // If the first attempt didn't find anything, retry once with a category-based fallback term.
+          if (!data?.image_url) {
+            const fallbackTerm = fallbackSearchForCategory(categoryKey)
+            const fallbackRes = await api.get<ImageLookupResponse>(
+              `/images/lookup?query=${encodeURIComponent(fallbackTerm)}`,
+            )
+            if (fallbackRes.data?.image_url) {
+              data = fallbackRes.data
+            }
+          }
+
+          map[p.id] = data
         } catch {
           map[p.id] = {
             found: false,
