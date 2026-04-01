@@ -1,28 +1,11 @@
-import { useEffect, useState } from 'react'
-import { api } from '../api/client'
-import type { Product } from '../types'
+import { ITEMS } from '../data/items'
+import { imageForItem } from '../utils/itemImages'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 
 export function CatalogPublicPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    api
-      .get<Product[]>('/products')
-      .then((r) => {
-        if (!cancelled) setProducts(r.data)
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e?.response?.data?.detail ?? e.message ?? 'Failed to load')
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  const products = ITEMS
 
   return (
     <div className="ui-stack">
@@ -68,14 +51,11 @@ export function CatalogPublicPage() {
       <div>
         <h2 style={{ marginBottom: 8 }}>Component Catalog</h2>
         <p className="page-lead">
-          Browse parts and components. For admin actions,{' '}
-          <Link to="/login">log in</Link>.
+          Browse parts and components.
         </p>
       </div>
 
-      {error && <p className="ui-alert">Error: {error}</p>}
-
-      {products.length === 0 && !error && (
+      {products.length === 0 && (
         <Card variant="glass">
           <p style={{ color: 'var(--text-muted)' }}>No components listed yet. Check back later.</p>
         </Card>
@@ -84,6 +64,19 @@ export function CatalogPublicPage() {
       <div className="ui-grid">
         {products.map((p) => (
           <Card key={p.id} variant="compact">
+            <img
+              src={imageForItem(p)}
+              alt={p.name}
+              loading="lazy"
+              style={{
+                width: '100%',
+                height: 160,
+                objectFit: 'cover',
+                borderRadius: 12,
+                marginBottom: 12,
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            />
             <h3 style={{ marginTop: 0, color: 'var(--text-strong)' }}>{p.name}</h3>
             {p.description && <p style={{ marginBottom: 8 }}>{p.description}</p>}
             {p.url ? (

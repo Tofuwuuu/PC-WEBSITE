@@ -1,20 +1,7 @@
 import type { ReactNode } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/authStore'
-import { Button } from '../components/ui/Button'
+import { Link } from 'react-router-dom'
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const navigate = useNavigate()
-  const { token, user, logout } = useAuth()
-  const location = useLocation()
-
-  const isAuthRoute = location.pathname === '/login' || location.pathname === '/register'
-
-  const onLogout = () => {
-    logout()
-    navigate('/', { replace: true })
-  }
-
   return (
     <div className="app-shell">
       <header className="app-shell-header">
@@ -28,36 +15,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <Link to="/categories">Categories</Link>
           <Link to="/pre-built">Pre-Built PCs</Link>
           <Link to="/bundles">Bundles</Link>
-          <Link to="/accessories">Accessories</Link>
-          {token && <Link to="/dashboard">Dashboard</Link>}
+          <Link to="/items">Items</Link>
         </nav>
 
         <div className="app-shell-right">
-          {token && (
-            <>
-              <span className="app-shell-user">
-                {user?.email}
-              </span>
-              <Button type="button" variant="ghost" onClick={onLogout}>
-                Log out
-              </Button>
-            </>
-          )}
-          {!token && (
-            <>
-              {!isAuthRoute && (
-                <>
-                  <Link to="/login" className="app-shell-link-muted">Log in</Link>
-                  <Link
-                    to="/register"
-                    className="app-shell-cta"
-                  >
-                    Get started
-                  </Link>
-                </>
-              )}
-            </>
-          )}
+          <span className="app-shell-link-muted" style={{ paddingRight: 6 }}>
+            Open source build
+          </span>
         </div>
       </header>
 

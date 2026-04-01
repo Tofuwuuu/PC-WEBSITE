@@ -26,9 +26,9 @@ const categories = [
   },
   {
     key: 'accessories',
-    title: 'Accessories',
-    description: 'Add the finishing touches to your setup.',
-    route: '/accessories',
+    title: 'Items',
+    description: 'Hardware items like GPUs, CPUs, monitors, and more.',
+    route: '/items',
     buttonVariant: 'outline-accent' as const,
   },
 ]
